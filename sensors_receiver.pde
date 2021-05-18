@@ -4,7 +4,7 @@ import processing.sound.*;
 WebsocketServer ws;
 SinOsc sine;
 float freq = 0;
-float acceleration = 1;
+float acceleration = 1.0;
 float x, y, z;
 float c = 0;
 
@@ -13,11 +13,11 @@ void setup() {
   background(0);
   strokeWeight(2);
   ws = new WebsocketServer(this, 8080, "/");
-  //initSine();
+  initSine();
 }
 
 void draw() {
-  //updateSine();
+  updateSine();
   drawGraph();
 }
 
@@ -28,9 +28,10 @@ void initSine() {
 }
 
 void updateSine() {
+  //if (mouseY < height/2) {
   if (acceleration < 0.98) {
     float v = (0.98 - acceleration)/0.98;
-    freq += v * 20;
+    freq += v * 40;
   } else {
     freq *= 0.9;
   }
@@ -67,10 +68,9 @@ void webSocketServerEvent(String msg) {
       x = json.getFloat("x");
       y = json.getFloat("y");
       z = json.getFloat("z");
-      //println("x:" + x + " y:" + y + " z:" + z);
-      if (id == "acc") {
-        acceleration = dist(0, 0, 0, x, y, z);
-      }
+      //println(" x:" + x + " y:" + y + " z:" + z);
+      if (id.equals("acc"))
+        acceleration = sqrt(x*x + y*y + z*z);
       break;
     }
   case "bro": 
