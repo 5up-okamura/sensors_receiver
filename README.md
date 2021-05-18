@@ -1,1 +1,1 @@
-# sensors-receiver
+# sensors_receiver
