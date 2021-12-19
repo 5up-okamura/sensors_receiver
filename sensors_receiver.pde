@@ -1,130 +1,66 @@
-import websockets.*;
-import processing.sound.*;
+/**
+ * sensors_receiver
+ */
 
-WebsocketServer ws;
-SinOsc sine;
-float freq = 0;
-float acceleration = 1.0;
-float x, y, z;
-float c = 0;
+// カウンター
+int c = 0;
 
+// 前回の座標
+float px, py, pz;
+
+// 初期化
 void setup() {
   size(512, 512);
   background(0);
   strokeWeight(2);
-  ws = new WebsocketServer(this, 8080, "/");
-  initSine();
+  setupServer(8080, "/");
+  setupSine();
 }
 
+// 画面更新
 void draw() {
-  updateSine();
+  //updateSine();
   drawGraph();
 }
 
-void initSine() {
-  sine = new SinOsc(this);
-  sine.freq(freq);
-  sine.play();
-}
-
-void updateSine() {
-  //if (mouseY < height/2) {
-  if (acceleration < 0.98) {
-    float v = (0.98 - acceleration)/0.98;
-    freq += v * 40;
-  } else {
-    freq *= 0.9;
-  }
-  sine.freq(freq);
-}
-
+// グラフを描画
 void drawGraph() {
+  // cが0の時に画面をクリア
   if (c == 0) background(0);
 
-  float w = height*0.25;
-  stroke(255, 0, 0);
-  point(c, x*w + height*0.25);
-  stroke(0, 255, 0);
-  point(c, y*w + height*0.5);
-  stroke(0, 0, 255);
-  point(c, z*w + height*0.75);
+  // 振幅の大きさ
+  float w = height*0.125;
 
+  float y1, y2;
+
+  // xの線を描画
+  stroke(255, 0, 0); // 赤
+  y1 = px*w + height*0.25;
+  y2 = x*w + height*0.25;
+  line(c, y1, c+1, y2);
+
+  // yの線を描画
+  stroke(0, 255, 0); // 緑
+  y1 = py*w + height*0.5;
+  y2 = y*w + height*0.5;
+  line(c, y1, c+1, y2);
+
+  // zの線を描画
+  stroke(0, 0, 255); // 青
+  y1 = pz*w + height*0.75;
+  y2 = z*w + height*0.75;
+  line(c, y1, c+1, y2);
+
+  // 座標を格納
+  px = x;
+  py = y;
+  pz = z;
+
+  // カウンターを増加して、幅で割った余り（0〜widthを繰り返す）
   c = (c + 1) % width;
 }
 
+// マウスクリック
 void mousePressed() {
   c = 0;
-}
-
-void webSocketServerEvent(String msg) {
-  JSONObject json = parseJSONObject(msg);
-  if (json == null) return;
-  String id = json.getString("id");
-  switch (id) {
-  case "acc":
-  case "gyr":
-  case "mag": 
-    {
-      x = json.getFloat("x");
-      y = json.getFloat("y");
-      z = json.getFloat("z");
-      //println(" x:" + x + " y:" + y + " z:" + z);
-      if (id.equals("acc"))
-        acceleration = sqrt(x*x + y*y + z*z);
-      break;
-    }
-  case "bro": 
-    {
-      float p = json.getFloat("pressure");
-      float r = json.getFloat("relativeAltitude");
-      println("pressure:" + p + " relativeAltitude:" + r);
-      break;
-    }
-  case "mot": 
-    {
-      int o = json.getInt("orientation");
-      JSONObject acc = json.getJSONObject("acceleration");
-      float x = acc.getFloat("x");
-      float y = acc.getFloat("y");
-      float z = acc.getFloat("z");
-      JSONObject aig = json.getJSONObject("accelerationIncludingGravity");
-      float x2 = aig.getFloat("x");
-      float y2 = aig.getFloat("y");
-      float z2 = aig.getFloat("z");
-      JSONObject r = json.getJSONObject("rotation");
-      float g = r.getFloat("gamma");
-      float b = r.getFloat("beta");
-      float a = r.getFloat("alpha");
-      JSONObject r2 = json.getJSONObject("rotationRate");
-      float g2 = r2.getFloat("gamma");
-      float b2 = r2.getFloat("beta");
-      float a2 = r2.getFloat("alpha");
-      println("orientation:" + o);
-      println("acceleration x:" + x + " y:" + y + " z:" + z);
-      println("accelerationIncludingGravity x:" + x2 + " y:" + y2 + " z:" + z2);
-      println("rotation gamma:" + g + " beta:" + b + " alpha:" + a);
-      println("rotationRate gamma:" + g2 + " beta:" + b2 + " alpha:" + a2);
-      break;
-    }
-  case "ped": 
-    {
-      int s = json.getInt("step");
-      println("step:" + s);
-      break;
-    }
-  case "fac": 
-    {
-      float s = json.getFloat("smiling");
-      float l = json.getFloat("leftEye");
-      float r = json.getFloat("rightEye");
-      println("smiling:" + s + " leftEye:" + l + " rightEye:" + r);
-      break;
-    }
-  case "bar": 
-    {
-      String r = json.getString("result");
-      println("result:" + r);
-      break;
-    }
-  }
 }
