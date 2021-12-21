@@ -12,7 +12,7 @@ class ParticleSystem {
 
   void addParticle(PVector v) {
     Particle p = new Particle(origin);
-    p.velocity = v;
+    p.velocity = new PVector(v.x, v.y);
     particles.add(p);
   }
 

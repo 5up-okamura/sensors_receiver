@@ -1,5 +1,5 @@
 /**
- * sensors_receiver2
+ * ParticleTest
  * https://processing.org/examples/simpleparticlesystem.html
  */
 
@@ -15,6 +15,6 @@ void setup() {
 // 画面更新
 void draw() {
   background(0);
-  ps.addParticle(new PVector(x, y));
+  ps.addParticle(vec);
   ps.run();
 }
