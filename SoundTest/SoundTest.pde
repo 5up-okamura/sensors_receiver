@@ -19,7 +19,7 @@ void setup() {
 
 // 画面更新
 void draw() {
-  //updateSine();
+  updateSine();
   drawGraph();
 }
 
