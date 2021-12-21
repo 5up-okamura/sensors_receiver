@@ -1,12 +1,9 @@
 /**
- * sensors_receiver
+ * SoundTest
  */
 
 // カウンター
 int c = 0;
-
-// 前回の座標
-float px, py, pz;
 
 // 初期化
 void setup() {
@@ -14,12 +11,12 @@ void setup() {
   background(0);
   strokeWeight(2);
   setupServer(8080, "/");
-  setupSine();
+  setupOsc();
 }
 
 // 画面更新
 void draw() {
-  updateSine();
+  updateOsc();
   drawGraph();
 }
 
@@ -35,26 +32,21 @@ void drawGraph() {
 
   // xの線を描画
   stroke(255, 0, 0); // 赤
-  y1 = px*w + height*0.25;
-  y2 = x*w + height*0.25;
+  y1 = pvec.x*w + height*0.25;
+  y2 = vec.x*w + height*0.25;
   line(c, y1, c+1, y2);
 
   // yの線を描画
   stroke(0, 255, 0); // 緑
-  y1 = py*w + height*0.5;
-  y2 = y*w + height*0.5;
+  y1 = pvec.y*w + height*0.5;
+  y2 = vec.y*w + height*0.5;
   line(c, y1, c+1, y2);
 
   // zの線を描画
   stroke(0, 0, 255); // 青
-  y1 = pz*w + height*0.75;
-  y2 = z*w + height*0.75;
+  y1 = pvec.z*w + height*0.75;
+  y2 = vec.z*w + height*0.75;
   line(c, y1, c+1, y2);
-
-  // 座標を格納
-  px = x;
-  py = y;
-  pz = z;
 
   // カウンターを増加して、幅で割った余り（0〜widthを繰り返す）
   c = (c + 1) % width;
