@@ -123,11 +123,12 @@ void webSocketServerEvent(String msg) {
     // バーコード認識
     // https://docs.expo.dev/versions/v44.0.0/sdk/bar-code-scanner/
     {
-      String r = json.getString("result");
-      println("result:" + r);
+      String s = json.getString("result");
+      println("barcode:" + s);
       // 値を追加
-      barcodes.add(r);
-      onScan(r);
+      barcodes.add(s);
+      // スキャンされた文字を処理
+      onScan(s);
       break;
     }
   }
@@ -150,46 +151,93 @@ class Face {
   PVector nose; // Nose Base Position
 
   Face(JSONObject f) {
-    this.id = f.getInt("faceID");
+    if (!f.isNull("faceID")) this.id = f.getInt("faceID");
 
-    JSONObject b = f.getJSONObject("bounds");
-    JSONObject o = b.getJSONObject("origin");
-    this.origin = new PVector(o.getFloat("x"), o.getFloat("y"));
-    JSONObject s = b.getJSONObject("size");
-    this.width = s.getFloat("width");
-    this.height = s.getFloat("height");
+    if (!f.isNull("bounds")) {
+      JSONObject bounds = f.getJSONObject("bounds");
+      JSONObject ori = bounds.getJSONObject("origin");
+      this.origin = new PVector(ori.getFloat("x"), ori.getFloat("y"));
+      JSONObject siz = bounds.getJSONObject("size");
+      this.width = siz.getFloat("width");
+      this.height = siz.getFloat("height");
+    }
 
-    this.roll = f.getFloat("rollAngle");
-    this.yaw = f.getFloat("yawAngle");
+    if (!f.isNull("rollAngle")) this.roll = f.getFloat("rollAngle");
+    if (!f.isNull("yawAngle")) this.yaw = f.getFloat("yawAngle");
 
-    this.smiling = f.getFloat("smilingProbability");
+    if (!f.isNull("smilingProbability")) this.smiling = f.getFloat("smilingProbability");
 
-    JSONObject earL = f.getJSONObject("leftEarPosition");
-    this.earL = new PVector(earL.getFloat("x"), earL.getFloat("y"));
-    JSONObject earR = f.getJSONObject("rightEarPosition");
-    this.earR = new PVector(earR.getFloat("x"), earR.getFloat("y"));
+    if (!f.isNull("leftEarPosition")) {
+      JSONObject earL = f.getJSONObject("leftEarPosition");
+      this.earL = new PVector(earL.getFloat("x"), earL.getFloat("y"));
+    }
+    if (!f.isNull("rightEarPosition")) {
+      JSONObject earR = f.getJSONObject("rightEarPosition");
+      this.earR = new PVector(earR.getFloat("x"), earR.getFloat("y"));
+    }
 
-    JSONObject eyeL = f.getJSONObject("leftEyePosition");
-    this.eyeL = new PVector(eyeL.getFloat("x"), eyeL.getFloat("y"));
-    JSONObject eyeR = f.getJSONObject("rightEyePosition");
-    this.eyeR = new PVector(eyeR.getFloat("x"), eyeR.getFloat("y"));
+    if (!f.isNull("leftEyePosition")) {
+      JSONObject eyeL = f.getJSONObject("leftEyePosition");
+      this.eyeL = new PVector(eyeL.getFloat("x"), eyeL.getFloat("y"));
+    }
+    if (!f.isNull("rightEyePosition")) {
+      JSONObject eyeR = f.getJSONObject("rightEyePosition");
+      this.eyeR = new PVector(eyeR.getFloat("x"), eyeR.getFloat("y"));
+    }
 
-    this.eyeOpenL = f.getFloat("leftEyeOpenProbability");
-    this.eyeOpenR = f.getFloat("rightEyeOpenProbability");
+    if (!f.isNull("leftEyeOpenProbability")) this.eyeOpenL = f.getFloat("leftEyeOpenProbability");
+    if (!f.isNull("rightEyeOpenProbability")) this.eyeOpenR = f.getFloat("rightEyeOpenProbability");
 
-    JSONObject cheekL = f.getJSONObject("leftCheekPosition");
-    this.cheekL = new PVector(cheekL.getFloat("x"), cheekL.getFloat("y"));
-    JSONObject cheekR = f.getJSONObject("rightCheekPosition");
-    this.cheekR = new PVector(cheekR.getFloat("x"), cheekR.getFloat("y"));
+    if (!f.isNull("leftCheekPosition")) {
+      JSONObject cheekL = f.getJSONObject("leftCheekPosition");
+      this.cheekL = new PVector(cheekL.getFloat("x"), cheekL.getFloat("y"));
+    }
+    if (!f.isNull("rightCheekPosition")) {
+      JSONObject cheekR = f.getJSONObject("rightCheekPosition");
+      this.cheekR = new PVector(cheekR.getFloat("x"), cheekR.getFloat("y"));
+    }
 
-    JSONObject mouth = f.getJSONObject("mouthPosition");
-    this.mouth = new PVector(mouth.getFloat("x"), mouth.getFloat("y"));
-    JSONObject mouthL = f.getJSONObject("leftMouthPosition");
-    this.mouthL = new PVector(mouthL.getFloat("x"), mouthL.getFloat("y"));
-    JSONObject mouthR = f.getJSONObject("rightMouthPosition");
-    this.mouthR = new PVector(mouthR.getFloat("x"), mouthR.getFloat("y"));
+    if (!f.isNull("mouthPosition")) {
+      JSONObject mouth = f.getJSONObject("mouthPosition");
+      this.mouth = new PVector(mouth.getFloat("x"), mouth.getFloat("y"));
+    }
+    if (!f.isNull("leftMouthPosition")) {
+      JSONObject mouthL = f.getJSONObject("leftMouthPosition");
+      this.mouthL = new PVector(mouthL.getFloat("x"), mouthL.getFloat("y"));
+    }
+    if (!f.isNull("rightMouthPosition")) {
+      JSONObject mouthR = f.getJSONObject("rightMouthPosition");
+      this.mouthR = new PVector(mouthR.getFloat("x"), mouthR.getFloat("y"));
+    }
 
-    JSONObject nose = f.getJSONObject("noseBasePosition");
-    this.nose = new PVector(nose.getFloat("x"), nose.getFloat("y"));
+    if (!f.isNull("noseBasePosition")) {
+      JSONObject nose = f.getJSONObject("noseBasePosition");
+      this.nose = new PVector(nose.getFloat("x"), nose.getFloat("y"));
+    }
+  }
+  
+  @Override
+  public String toString() {
+      String t = "";
+      t += " id:" + id;
+      if (this.origin != null) t += " origin:" + origin;
+      t += " width:" + width;
+      t += " height:" + height;
+      t += " roll:" + roll;
+      t += " yaw:" + yaw; // Roll/Yaw Angle
+      t += " smiling:" + smiling; // Smiling Probability
+      if (this.earL != null) t += " earL:" + earL;
+      if (this.earR != null) t += " earR:" + earR; // Ear Position
+      if (this.eyeL != null) t += " eyeL:" + eyeL;
+      if (this.eyeR != null) t += " eyeR:" + eyeR; // Eye Position
+      t += " eyeOpenL:" + eyeOpenL;
+      t += " eyeOpenR:" + eyeOpenR; // Eye Open Probability
+      if (this.cheekL != null) t += " cheekL:" + cheekL;
+      if (this.cheekR != null) t += " cheekR:" + cheekR; // Cheek Position
+      if (this.mouth != null) t += " mouth:" + mouth;
+      if (this.mouthL != null) t += " mouthL:" + mouthL;
+      if (this.mouthR != null) t += " mouthR:" + mouthR; // Mouth Position
+      if (this.nose != null) t += " nose:" + nose; // Nose Base Position
+      return super.toString() + t;
   }
 }
