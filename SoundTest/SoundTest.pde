@@ -8,8 +8,6 @@ int c = 0;
 // 初期化
 void setup() {
   size(512, 512);
-  background(0);
-  strokeWeight(2);
   setupServer(8080, "/");
   setupOsc();
 }
@@ -24,6 +22,9 @@ void draw() {
 void drawGraph() {
   // cが0の時に画面をクリア
   if (c == 0) background(0);
+
+  // 線の太さをセット
+  strokeWeight(2);
 
   // 振幅の大きさ
   float w = height*0.125;
